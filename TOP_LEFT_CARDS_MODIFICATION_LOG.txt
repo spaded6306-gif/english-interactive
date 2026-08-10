@@ -1,0 +1,36 @@
+Top-left draggable card position modification
+Date: 2026-08-11
+
+BASE
+- Base: github_pages_lesson_canvas_tools_fix/index.html and its existing assets.
+- PowerPoint was not read, converted, or modified.
+- No lesson page was regenerated.
+
+ONLY INDEX.HTML CHANGE
+- Only the four existing draggable cards' data-left, data-top, style.left, and style.top values changed.
+- No CSS, JavaScript, drag handling, navigation, page counter, page 6 behavior, or other slide section changed.
+
+NEW INITIAL POSITIONS
+- in: left 1%, top 1%
+- on: left 14%, top 1%
+- under: left 1%, top 11%
+- by: left 14%, top 11%
+- Positioning context remains #prepCanvasTools, the complete original PPT slide canvas.
+- Layout is a 2 x 2 staging area in the upper-left corner.
+
+RESET AND NAVIGATION
+- The existing resetPpt10Activity() function was not modified.
+- It already restores each card from card.dataset.left and card.dataset.top.
+- Therefore Reset now restores the new upper-left positions.
+- The existing leave-page reset also uses the same function, so Next then Back restores all four cards to the upper-left positions.
+
+BROWSER ACCEPTANCE
+- Initial page render: all four cards appeared at the new upper-left coordinates without overlapping one another or appearing beside the cats.
+- in, on, under, and by were each dragged using pointer interaction and their left/top values changed.
+- Cards remained at the released positions.
+- Reset restored all four percentage positions exactly.
+- A card was dragged again; Next then Back restored all four initial positions.
+- Browser console error check: no errors.
+
+ASSETS
+- No assets were added, replaced, or modified.

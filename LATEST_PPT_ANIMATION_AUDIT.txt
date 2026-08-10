@@ -1,0 +1,99 @@
+Latest PowerPoint correction — audit and implementation record
+
+Source verification
+- Latest PPT SHA-256: 3CFEB42CBA76587B51E508CBDA5EF3F4ED1E523C38818917334870B98B16BB30
+- Previous PPT SHA-256: CD18DE932F390D3E54F6A439666F23E0081ACD5EAB8AB7058D3BE133897CFEE8
+- The latest PowerPoint is a different file revision.
+- The completed animation-fix HTML was used as the only HTML/assets base.
+
+Mapping
+- PowerPoint slide 6 maps to integrated HTML page 6.
+- PowerPoint slide 12 maps to integrated HTML page 21.
+- Integrated HTML page 12 is PowerPoint slide 10; it is not PowerPoint slide 12.
+  Its existing in/on/by/under sequence was therefore left untouched.
+
+PowerPoint slide 6 object audit
+- Shape 6, Freeform 5: x=0, y=232474, width=4076054, height=2466532.
+- Shape 133, title text: x=146077, y=277508, width=8287020,
+  height=1415941. Text: “Listen carefully to the song. What words do
+  you hear in the lyrics? Put them in order.”
+- Shape 3, Freeform 2/image: x=5455566, y=1398864, width=3311935,
+  height=1590586.
+- Shape 8, Chinese instruction placeholder/body: x=-89034, y=4597257,
+  width=7886700, height=664954.
+- Picture 11: x=2073864, y=3432400, width=767130, height=994575.
+- Picture 13: x=7688933, y=3591700, width=875368, height=835275.
+- Picture 15: x=3813068, y=3381607, width=875368, height=1073957.
+- Picture 17: x=3032335, y=1962075, width=1257252, height=1175530.
+- Picture 19: x=5389541, y=3305103, width=1819513, height=1221676.
+- Picture 21: x=103651, y=2545787, width=1819514, height=1221676.
+- Text 22 “1”: x=750495, y=3509046, width=333213, height=400110.
+- Text 24 “2”: x=2741829, y=4042981, width=333213, height=400110.
+- Text 26 “3”: x=4159224, y=2298896, width=333213, height=400110.
+- Text 28 “4”: x=4667454, y=4055454, width=333213, height=400110.
+- Text 30 “5”: x=6144471, y=4255509, width=333213, height=400110.
+- Text 32 “6”: x=8464658, y=3391645, width=333213, height=400110.
+- Text 33 “2-6-3-5-4-1”: x=4667454, y=4584283, width=1506071,
+  height=451004. It is permanently visible in the latest PPT.
+- Media picture 2/audio icon: x=4549615, y=1352475, width=609600,
+  height=609600.
+
+PowerPoint slide 6 animation/timing
+- Only one main-sequence effect exists.
+- Target: media picture/object ID 2.
+- Type: Media Call, preset ID 1, command playFrom(0.0).
+- Trigger: On Click (nodeType=clickEffect).
+- Sequence: first and only click effect.
+- Delay: 0 ms after the click.
+- Duration: 55,776 ms.
+- Volume: 80,000 in the PowerPoint media node.
+- No With Previous or After Previous visual effects exist.
+- No answer-cover exit animation exists in this latest revision.
+- No object animation is synchronized to audio.currentTime.
+
+HTML implementation for PowerPoint slide 6
+- Replaced only assets/images/slide-6.png with the latest rendered slide.
+- Removed the obsolete custom answer-cover/reveal overlay from the prior fix.
+- Restored the established Play, Pause, and Stop JavaScript behavior.
+- Play starts/resumes the same extracted MP3.
+- Pause holds the current audio position.
+- Stop pauses and returns currentTime to 0.
+- Back/Next away from the page pauses and returns currentTime to 0.
+- Returning to the page does not autoplay.
+
+PowerPoint slide 12 object audit
+- Picture 3: x=477462, y=0, width=8189073, height=5143500.
+- Shape 9, yellow emphasis rectangle: x=4724398, y=3657600,
+  width=3029713, height=548640.
+- Shape 10, callout “1. Turn off”: x=2023873, y=2926080,
+  width=1962912, height=830580.
+- Shape 7, callout “2. Name”: x=6053329, y=1413510,
+  width=1560575, height=830580.
+- Shape 6, callout “3. Next”: x=6781885, y=4156710,
+  width=1560575, height=830580.
+
+PowerPoint slide 12 animation/timing
+- The slide contains no p:timing element.
+- It has no On Click, With Previous, or After Previous animation sequence.
+- It has no animation duration or delay values.
+- The latest rendered slide is byte-identical to the prior rendered slide 12.
+
+HTML implementation for PowerPoint slide 12
+- It remains integrated page 21 using assets/images/slide-12.png.
+- No invented animation was added.
+- No positional or layout change was required because the latest slide image
+  exactly matches the existing asset.
+
+Preservation and acceptance results
+- Total remains 26 pages with the same sequence and 1 / 26 numbering.
+- The other 25 slide sections are byte-for-byte identical to the previous
+  completed animation-fix version.
+- JavaScript syntax passed and no duplicate IDs were found.
+- Browser test: page 6 initial audio paused at 0:00.
+- Browser test: Play advanced audio normally.
+- Browser test: Pause held the same currentTime.
+- Browser test: Stop returned audio to 0:00.
+- Browser test: Next stopped/reset audio; Back returned without autoplay.
+- Browser test: integrated page 21 loaded assets/images/slide-12.png correctly.
+- The nine original HTML activities, navigation, styling, and the existing
+  integrated-page-12 preposition sequence were not changed.

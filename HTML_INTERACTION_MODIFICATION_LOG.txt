@@ -1,0 +1,55 @@
+PPT + HTML interaction modification log
+Date: 2026-08-10
+
+BASE
+- HTML base: github_pages_lesson_latest_ppt_fix/index.html and its assets.
+- PowerPoint content source: HWG4 U4where's my hat0809.pptx (latest supplied copy).
+- Output is a new folder; the base version was not overwritten.
+
+PAGE MAPPING
+- PowerPoint slide 6 -> final HTML page 6.
+- PowerPoint slide 10 -> final HTML page 12.
+
+HTML PAGE 6
+- Preserved the latest PowerPoint slide image, all text, illustrations, positions, song file, and Play/Pause/Stop controls.
+- Added a teacher-controlled native HTML reveal area.
+- Reveal order: bag -> box -> computer -> desk -> chair -> table -> answer/order line.
+- Each click inside the main slide picture reveals one item with a short fade/scale transition.
+- Navigation and audio controls are outside the reveal target and do not advance the animation.
+- Animation and music are independent.
+- Leaving page 6 resets all reveal layers and stops audio at 0:00.
+- Returning to page 6 does not autoplay and starts again at reveal step 1.
+
+HTML PAGE 12 (POWERPOINT SLIDE 10)
+- Preserved the complete original cat picture and background as assets/images/slide-10.png.
+- Added a separate practice panel; no card overlaps the cat picture or bottom navigation.
+- Original four picture meanings are retained:
+  1. in the box
+  2. on the box
+  3. by the table
+  4. under the table
+- Added large in/on/under/by cards.
+- Desktop supports native drag/drop plus pointer drag into the first blank.
+- Tablet/phone supports direct card tapping; tapping fills and checks immediately.
+- Correct answers show Correct! and advance to the next original picture.
+- Incorrect answers show Try again. without an alert.
+- Reset clears the blank and feedback and returns to picture 1.
+- Leaving and returning to page 12 also resets the activity.
+- At widths up to 820px the image and activity stack vertically for clearer tablet use.
+
+PRESERVATION CHECK
+- 26-page order and page counter remain unchanged.
+- Slide-section comparison confirms only final HTML pages 6 and 12 changed.
+- The other 24 slide sections are byte-for-byte identical to the base.
+- Existing image, audio, Back, Next, Full Screen, page counter, and all other interactive activities remain present.
+- No assets were replaced or modified in this revision.
+
+BROWSER ACCEPTANCE RESULTS
+- Page 6: initial reveal state 0/7; two content clicks revealed exactly 2 items; all 7 steps completed.
+- Page 6 audio: Play advanced playback; Pause held the same time; Stop returned to 0:00.
+- Page 6 navigation: Next stopped/reset audio and animation; Back returned with no autoplay and 0/7 revealed.
+- Page 12: wrong click returned Try again.; correct click returned Correct!.
+- Page 12: real pointer drag of on into the blank on picture 2 was accepted and advanced to picture 3.
+- Page 12 Reset and leave/return both restored picture 1 with an empty blank.
+- 768 x 1024 tablet viewport: stacked layout rendered correctly and tap-to-answer returned Correct!.
+- Static validation: JavaScript syntax passed, 26 sections found, no navigation/page-count change detected.

@@ -1,0 +1,80 @@
+Where's My Hat? — Animation correction log
+
+Scope
+- Based only on the completed github_pages_lesson/index.html and its assets.
+- Output is a separate corrected copy; the working version was not overwritten.
+- Slide order remains exactly 26 pages.
+- Only integrated pages 6 and 12 were changed.
+- The other 24 slide sections are byte-for-byte identical to the prior version.
+
+Important source mapping confirmation
+- The song page sourced from PowerPoint slide 6 is integrated page 6, not page 8.
+- Integrated page 12 is sourced from PowerPoint slide 10.
+- Original PowerPoint slide 12 has no animation timing tree.
+
+Original PowerPoint slide 6 animation
+- Click effect 1: media call playFrom(0.0), target shape ID 2.
+- Embedded media duration in the timing tree: 55,776 ms.
+- Click effect 2: exit effect, preset ID 22, wipe(left), target shape ID 34.
+- Shape 34 is a #FDF8EB rectangle covering the red answer.
+- Exit duration recorded by PowerPoint: 10 ms.
+- Revealed text beneath the cover: 2-6-3-5-4-1.
+- The reveal is a separate click effect; it is not scheduled to song timestamps.
+
+HTML reproduction for integrated page 6
+- The existing Play/Pause/Stop audio element and source file remain in place.
+- Play starts or resumes the same audio and arms the second-click reveal.
+- Clicking the main slide image reveals 2-6-3-5-4-1 with a short left-to-right wipe approximation.
+- Pause pauses the audio and the reveal state.
+- Resume continues from the current audio position without resetting the revealed answer.
+- Stop returns currentTime to 0 and hides the answer.
+- Back/Next away from the page stops audio and resets the answer.
+- Returning to the page does not autoplay.
+- Added functions: resetSlide6Animation, startSlide6Animation,
+  pauseSlide6Animation, resumeSlide6Animation.
+
+Original PowerPoint slide 10 animation
+- Click 1: title object entrance, preset ID 1 (Appear), shape ID 41.
+- Click 2: cover shape ID 2 exits with wipe(down), 500 ms, revealing “in”.
+- Click 3: cover shape ID 5 exits with wipe(down), 500 ms, revealing “on”.
+- Click 4: cover group ID 22 exits with wheel(1), 1000 ms, revealing “by”.
+- Click 5: cover shape ID 9 exits with wheel(1), 1000 ms, revealing “under”.
+- Therefore the verified PowerPoint answer order is in → on → by → under.
+  This differs from the requested assumed order in → on → under → by.
+  The PowerPoint XML and the pictured positions both confirm by is item 3 and
+  under is item 4, so the corrected HTML follows the source PowerPoint.
+
+HTML reproduction for integrated page 12
+- The main teaching image is the only click target.
+- Initial state hides all four answers.
+- Click sequence: in → on → by → under.
+- in/on use a 500 ms downward wipe approximation.
+- by/under use a 1000 ms circular wheel-style reveal approximation.
+- A fifth click makes no further change.
+- Back, Next, and Full Screen do not trigger the sequence.
+- Leaving the page resets all answers; returning begins from the initial state.
+- Added resetSequentialPrepositionAnimation.
+
+Browser acceptance results
+- Loaded 26 pages and confirmed 1 / 26 counter.
+- Page 6 initial state: audio paused at 0; answer hidden.
+- Play: audio advanced normally; answer remained hidden until content click.
+- Content click: answer appeared.
+- Pause: audio time remained stable.
+- Resume: audio continued from its paused position.
+- Stop: audio paused, currentTime returned to 0, answer reset.
+- Next then Back: no autoplay; audio and answer remained reset.
+- Page 12 initial answers: none visible.
+- Four clicks produced: [in], [in,on], [in,on,by], [in,on,by,under].
+- Fifth click added nothing.
+- Next moved only to page 13; Back returned to page 12 with all answers hidden.
+- Final screenshots were visually inspected; all four answers display fully.
+
+Preservation checks
+- JavaScript syntax passed.
+- No duplicate IDs.
+- Page counter remains 1 / 26.
+- All existing assets are unchanged.
+- Word-Picture Review, Pair Game, Listen and Look, Choose the Answer,
+  Build the Sentence, Don't Forget “the”, What Does “by” Mean?,
+  Quick Challenge, and Speak Together were not changed.

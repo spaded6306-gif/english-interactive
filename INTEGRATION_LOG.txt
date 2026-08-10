@@ -1,0 +1,39 @@
+Where's My Hat? — Integration log
+
+Source material
+- PowerPoint: 17 slides
+- Latest HTML lesson: 9 interactive slides
+- Original source files were not overwritten.
+
+Final 26-slide sequence
+1–7: PowerPoint slides 1–7
+8: Word-Picture Review
+9: Pair Game
+10–12: PowerPoint slides 8–10
+13: Listen and Look
+14: Choose the Answer
+15: Build the Sentence
+16: Don't Forget “the”
+17: What Does “by” Mean?
+18: Quick Challenge
+19: Speak Together
+20–26: PowerPoint slides 11–17
+
+Implementation
+- PowerPoint slides are high-quality PNG assets displayed inside native HTML sections.
+- A CSS fade/slide-in effect is applied whenever a PowerPoint-derived page opens.
+- The embedded PowerPoint MP3 was extracted to assets/audio/lesson-song.mp3.
+- Page 6 provides Play, Pause, Stop, and elapsed/total time.
+- Leaving page 6 automatically pauses the audio and returns it to 0:00.
+- The original HTML CSS, JavaScript, images, activities, and interactions remain embedded in index.html.
+- Shared Back, Next, Full Screen, ArrowLeft, ArrowRight, and 1/26–26/26 numbering are active.
+- Relative paths and filenames are GitHub Pages safe.
+
+Validation
+- JavaScript syntax passed.
+- Exactly 26 slide sections detected.
+- Required sequence passed.
+- No duplicate IDs detected.
+- All 17 slide images and the MP3 are present.
+- All nine HTML activity containers are present.
+- Navigation, audio controls, and audio reset hooks are present.

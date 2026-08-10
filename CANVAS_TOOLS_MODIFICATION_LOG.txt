@@ -1,0 +1,58 @@
+PPT canvas overlay interaction modification log
+Date: 2026-08-11
+
+BASE AND MAPPING
+- HTML base: github_pages_lesson_html_interaction_fix/index.html and unchanged assets.
+- PPT slide 6 maps to final HTML page 6.
+- PPT slide 10 maps to final HTML page 12.
+- Output was created as a new folder; the prior version was not overwritten.
+
+SOURCE NOTE FOR PPT SLIDE 6
+- The supplied PPT slide 6 XML and rendered image do not contain a separate literal English text object named Answer.
+- The rendered slide contains the red answer 2-6-3-5-4-1 at the intended answer location.
+- To implement the requested behavior without changing the slide layout, an HTML Answer text trigger was placed directly over that original answer location while the original red answer is covered with the exact slide background color.
+
+HTML PAGE 6
+- Original slide-6.png, background, text, pictures, positions, and audio controls remain the source visual.
+- The Answer clickable target occupies only the original answer area; the rest of the slide is not clickable.
+- The HTML answer card starts with visibility:hidden and opacity:0.
+- Clicking Answer toggles the card 2-6-3-5-4-1 beside the trigger.
+- Leaving page 6 calls resetPpt6Answer(), so the card is hidden on return.
+- Existing Play/Pause/Stop functions and lesson-song.mp3 path were not modified.
+- Leaving the page still stops audio and returns currentTime to 0.
+
+HTML PAGE 12 (PPT SLIDE 10)
+- The complete original slide-10.png is unchanged and remains the full 16:9 canvas.
+- No sentence panel, fill-in area, Correct/Try again logic, or side panel remains.
+- Four HTML teaching cards are placed directly on the original answer lines:
+  in: left 27%, top 44%
+  on: left 78%, top 44%
+  by: left 27%, top 80%
+  under: left 78%, top 80%
+- The common positioning context is #prepCanvasTools, representing the complete PPT slide canvas.
+- Cards use position:absolute and final positions are saved through left/top only.
+- Pointer Events used: pointerdown, pointermove, pointerup, pointercancel, pointer capture.
+- Dragging is clamped inside the full slide canvas.
+- Mouse, pen, touch screen, iPad, Android tablet, and electronic-whiteboard pointer input use the same logic.
+- Only the four word cards receive pointer drag listeners; the cat image has pointer-events:none and cannot be dragged.
+- Reset restores the four percentage-based starting positions.
+- Leaving and returning to page 12 also restores all four cards.
+
+PRESERVATION
+- 26-page order, counter, Back, Next, Full Screen, and navigation code remain in place.
+- Static section comparison confirms only final HTML pages 6 and 12 differ from the base.
+- The other 24 slide sections are byte-for-byte identical.
+- No image, audio, or other asset was modified in this revision.
+
+ACTUAL BROWSER ACCEPTANCE
+- Desktop viewport render inspected for pages 6 and 12.
+- Page 6 initial answer card: hidden.
+- Page 6 Answer click: showed 2-6-3-5-4-1; second click hid it.
+- Page 6 navigation away/back: answer hidden again.
+- Page 6 Play: audio time advanced; Pause held progress; Stop returned to 0:00.
+- Page 6 navigation away/back: audio paused at 0:00.
+- Page 12 original cat picture and all four layouts stayed unchanged behind the cards.
+- Page 12 mouse pointer drag changed the in card's left/top coordinates and the card remained at the released position.
+- Page 12 Reset restored left:27%; top:44%.
+- Page 12 navigation away/back also restored the initial position.
+- Full Screen button was clicked without changing page/card state; the in-app test browser did not grant fullscreen mode, so native fullscreen entry itself could not be confirmed in that browser. The existing fullscreen function was not modified.
