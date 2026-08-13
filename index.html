@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Where's My Hat? Interactive Lesson</title>
+<style>
+:root{
+  --mint:#dff7ef;--sky:#dff3ff;--cream:#fffaf0;--peach:#ffe5d4;--blue:#326b7a;--green:#4f9b78;--pink:#e9878d;--yellow:#ffd56a;--ink:#23424a;--white:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Arial Rounded MT Bold","Trebuchet MS",Arial,sans-serif;background:linear-gradient(135deg,var(--sky),var(--mint));color:var(--ink);overflow:hidden}
+#app{width:100vw;height:100vh;position:relative}
+.slide{display:none;width:100%;height:100%;padding:28px 42px 90px;position:absolute;inset:0;background:rgba(255,255,255,.78)}
+.slide.active{display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+h1{font-size:64px;margin:6px 0 12px;color:var(--blue);text-align:center;line-height:1.05}
+h2{font-size:50px;margin:6px 0 16px;color:var(--green);text-align:center}
+p,.prompt,.sentence,.choice,.card,.word,.label{font-size:45px}
+.small{font-size:34px}
+.subtitle{font-size:42px;text-align:center;margin-bottom:18px}
+.stage{width:min(1150px,94vw);flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap}
+.panel{position:relative;z-index:5;background:#fff;border:5px solid #cfe9df;border-radius:28px;padding:24px;box-shadow:0 10px 24px rgba(35,66,74,.12)}
+.btn{font-size:36px;padding:14px 24px;border:none;border-radius:20px;background:var(--green);color:#fff;cursor:pointer;box-shadow:0 6px 0 #34745a;min-width:140px}
+.btn:active{transform:translateY(3px);box-shadow:0 3px 0 #34745a}.btn.alt{background:var(--blue);box-shadow:0 6px 0 #214a56}.btn.warn{background:var(--pink);box-shadow:0 6px 0 #b95d65}
+.nav{position:absolute;bottom:16px;left:0;right:0;display:flex;justify-content:center;gap:14px;align-items:center}.counter{font-size:28px;min-width:120px;text-align:center}
+.scene{position:relative;flex:0 0 520px;width:520px;height:340px;background:linear-gradient(#dff3ff 0 58%,#ddf2ce 58%);border-radius:28px;overflow:hidden;border:5px solid #b8dfd0}
+.floor{position:absolute;bottom:0;left:0;right:0;height:92px;background:#ecd9b7}
+.bench{position:absolute;width:250px;height:30px;background:#b97846;border-radius:12px;left:135px;top:170px}.bench:before,.bench:after{content:"";position:absolute;width:25px;height:105px;background:#8b5b35;top:18px}.bench:before{left:30px}.bench:after{right:30px}
+.bag{position:absolute;width:120px;height:120px;background:#ffb38a;border:6px solid #cf765a;border-radius:22px 22px 35px 35px;left:62px;top:185px}.bag:before{content:"";position:absolute;width:55px;height:35px;border:7px solid #cf765a;border-bottom:none;border-radius:30px 30px 0 0;left:26px;top:-34px}
+.hat{position:absolute;width:92px;height:48px;background:#f05c5c;border-radius:48px 48px 16px 16px;border:5px solid #bb3f3f;z-index:3}.hat:after{content:"";position:absolute;width:125px;height:18px;background:#f05c5c;border:5px solid #bb3f3f;border-radius:50%;left:-20px;top:29px}
+.puppy{position:absolute;width:86px;height:75px;background:#b77745;border-radius:45% 45% 35% 35%;right:55px;bottom:48px;border:5px solid #81502f}.puppy:before,.puppy:after{content:"";position:absolute;width:24px;height:40px;background:#8e5d38;border-radius:50%;top:-8px}.puppy:before{left:3px;transform:rotate(-25deg)}.puppy:after{right:3px;transform:rotate(25deg)}
+.eye{position:absolute;width:8px;height:8px;background:#222;border-radius:50%;top:30px}.eye.l{left:25px}.eye.r{right:25px}
+.character{position:absolute;left:350px;top:80px;width:90px;height:165px}.head{width:78px;height:78px;background:#f2c5a2;border-radius:50%;border:5px solid #915f45}.body{width:82px;height:85px;background:#72b7d8;border-radius:20px;margin-top:-5px;border:5px solid #447f98}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;width:min(1200px,95vw)}
+.prep-card{background:#fff;border:5px solid #cfe9df;border-radius:24px;padding:18px;text-align:center;cursor:pointer;min-height:230px;display:flex;flex-direction:column;justify-content:center;align-items:center}.prep-card strong{font-size:58px;color:var(--blue)}.mini-icon{font-size:78px;margin-top:16px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:18px;width:min(1050px,92vw)}.choice{background:#fff;border:5px solid #cfe9df;border-radius:22px;padding:18px;text-align:center;cursor:pointer}.choice.correct{background:#d9f8df;border-color:#57b56b}.choice.wrong{animation:shake .35s;background:#ffe1e1;border-color:#db6a6a}@keyframes shake{25%{transform:translateX(-10px)}50%{transform:translateX(10px)}75%{transform:translateX(-6px)}}
+.feedback{font-size:42px;min-height:54px;margin:10px;color:var(--green)}
+.match-area{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:min(1100px,94vw)}.dropzone{min-height:110px;border:5px dashed #9ccbb9;border-radius:22px;padding:14px;background:#f9fffc;display:flex;align-items:center;justify-content:center;text-align:center}.drag-card{background:#fff1c9;border:5px solid #e7bd4d;border-radius:22px;padding:15px;margin:10px;cursor:grab;text-align:center}
+.words{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}.word{background:#fff;border:5px solid #b9dce7;border-radius:18px;padding:12px 18px;cursor:grab}.sentence-zone{min-height:100px;border:5px dashed #a8cdbf;border-radius:22px;padding:14px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;background:#f9fffc;width:min(1000px,92vw)}
+.the-quiz{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}.the-card{font-size:48px;background:#fff;border:5px solid #cfe9df;border-radius:22px;padding:18px;cursor:pointer}
+.by-demo{display:flex;gap:40px;align-items:center;justify-content:center;width:100%}.boxobj{width:150px;height:150px;background:#ffd56a;border:6px solid #c59c28;border-radius:18px;position:relative}.ball{width:90px;height:90px;border-radius:50%;background:#74bde0;border:6px solid #3e819f}
+.final-score{font-size:60px;color:var(--blue)}
+.teacher-note{position:absolute;top:16px;right:20px;font-size:24px;background:#fff4c5;border:3px solid #e5bf42;border-radius:16px;padding:8px 12px}
+@media(max-width:900px){h1{font-size:52px}h2{font-size:46px}p,.prompt,.sentence,.choice,.card,.word,.label{font-size:40px}.grid4{grid-template-columns:repeat(2,1fr)}.scene{transform:scale(.88)}}
+
+/* Consistent classroom object illustrations (no emoji dependency) */
+.classroom-icon{position:relative;display:inline-block;flex:0 0 auto}
+.icon-chair{width:105px;height:115px}
+.icon-chair .seat{position:absolute;left:18px;top:55px;width:70px;height:22px;background:#f3ad70;border:5px solid #b86f42;border-radius:12px}
+.icon-chair .back{position:absolute;left:18px;top:5px;width:70px;height:58px;background:#ffd09f;border:5px solid #b86f42;border-radius:18px 18px 10px 10px}
+.icon-chair .leg1,.icon-chair .leg2{position:absolute;top:75px;width:9px;height:38px;background:#8b5b35;border-radius:5px}
+.icon-chair .leg1{left:29px}.icon-chair .leg2{right:29px}
+
+.icon-table{width:155px;height:110px}
+.icon-table .top{position:absolute;left:5px;top:24px;width:145px;height:24px;background:#efb36f;border:5px solid #a86a36;border-radius:13px}
+.icon-table .leg{position:absolute;top:47px;width:12px;height:61px;background:#9b6237;border-radius:6px}
+.icon-table .l1{left:24px}.icon-table .l2{right:24px}
+
+.icon-desk{width:155px;height:125px}
+.icon-desk .top{position:absolute;left:4px;top:15px;width:147px;height:25px;background:#86c5d8;border:5px solid #447f98;border-radius:12px}
+.icon-desk .side{position:absolute;top:38px;width:24px;height:83px;background:#69a9bd;border:5px solid #447f98;border-radius:6px}
+.icon-desk .s1{left:15px}.icon-desk .s2{right:15px}
+.icon-desk .drawer{position:absolute;right:20px;top:49px;width:58px;height:38px;background:#dff3ff;border:5px solid #447f98;border-radius:8px}
+.icon-desk .drawer:after{content:"";position:absolute;width:14px;height:5px;background:#447f98;border-radius:3px;left:17px;top:12px}
+
+.icon-computer{width:125px;height:110px}
+.icon-computer .screen{position:absolute;left:8px;top:5px;width:109px;height:72px;background:#dff3ff;border:7px solid #416a78;border-radius:12px}
+.icon-computer .screen:after{content:"";position:absolute;inset:8px;background:linear-gradient(135deg,#9ddcf2,#dff7ef);border-radius:5px}
+.icon-computer .stand{position:absolute;left:55px;top:76px;width:16px;height:20px;background:#416a78}
+.icon-computer .base{position:absolute;left:32px;top:94px;width:62px;height:12px;background:#416a78;border-radius:8px}
+
+.icon-box{width:120px;height:105px}
+.icon-box .body{position:absolute;left:8px;top:28px;width:104px;height:70px;background:#ffd56a;border:6px solid #c59c28;border-radius:8px 8px 16px 16px}
+.icon-box .rim{position:absolute;left:0;top:17px;width:120px;height:25px;background:#ffe89f;border:6px solid #c59c28;border-radius:50%}
+
+.icon-bag{width:112px;height:118px}
+.icon-bag .body{position:absolute;left:6px;top:24px;width:100px;height:88px;background:#ffb38a;border:6px solid #cf765a;border-radius:22px 22px 34px 34px}
+.icon-bag .handle{position:absolute;left:32px;top:0;width:48px;height:37px;border:7px solid #cf765a;border-bottom:none;border-radius:28px 28px 0 0}
+.icon-bag .pocket{position:absolute;left:27px;top:64px;width:58px;height:32px;background:#ffd1b9;border:5px solid #cf765a;border-radius:10px}
+
+.icon-wrap{height:125px;display:flex;align-items:center;justify-content:center}
+.scene-object{position:absolute;z-index:2}
+.scene-object .classroom-icon{transform-origin:center}
+
+
+/* Layout safety fixes: reserve a clear footer area and prevent controls from covering content */
+body{overflow:hidden}
+#app{height:100dvh;min-height:100vh}
+.slide{
+  height:calc(100dvh - 96px);
+  min-height:0;
+  padding:22px 42px 28px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-gutter:stable;
+  overscroll-behavior:contain;
+}
+.slide.active{padding-bottom:34px}
+.stage{
+  flex:0 0 auto;
+  min-height:min-content;
+  margin-bottom:14px;
+}
+.nav{
+  position:fixed;
+  z-index:100;
+  bottom:0;
+  min-height:96px;
+  padding:12px 18px;
+  background:rgba(255,255,255,.97);
+  border-top:4px solid #cfe9df;
+  box-shadow:0 -8px 22px rgba(35,66,74,.12);
+  flex-wrap:nowrap;
+}
+.nav .btn{font-size:30px;padding:12px 20px;min-width:128px}
+.feedback{
+  flex:0 0 auto;
+  width:min(1050px,92vw);
+  margin:12px auto 6px;
+  padding:6px 12px;
+  line-height:1.2;
+  text-align:center;
+}
+.choices,.match-area,.sentence-zone,.words,.the-quiz,.by-demo,.grid4{flex:0 0 auto}
+.panel p:first-child{margin-top:0}
+.panel p:last-child{margin-bottom:0}
+
+/* Keep action buttons in their own row instead of floating into nearby text */
+.slide > .btn,
+.slide > div[style*="display:flex"]{
+  flex:0 0 auto;
+}
+.slide > .btn{margin-top:14px;margin-bottom:8px}
+
+/* Compact only the crowded activity pages without shrinking the lesson text */
+.match-area .dropzone{min-height:92px}
+.match-area .drag-card{margin:7px;padding:11px 14px}
+.by-demo .panel{padding:16px}
+
+@media(max-height:820px){
+  .slide{padding-top:14px;height:calc(100dvh - 88px)}
+  h1{margin:2px 0 8px}
+  h2{margin:2px 0 9px}
+  .subtitle{margin-bottom:10px}
+  .prompt{margin-top:6px;margin-bottom:10px}
+  .stage{gap:16px;margin-bottom:8px}
+  .scene{height:300px}
+  .prep-card{min-height:205px;padding:12px}
+  .icon-wrap{height:105px}
+  .feedback{min-height:46px;margin-top:7px;margin-bottom:3px}
+  .nav{min-height:88px;padding:8px 14px}
+  .nav .btn{font-size:27px;padding:10px 16px}
+}
+
+@media(max-width:760px){
+  .slide{padding-left:20px;padding-right:20px}
+  .nav{gap:7px;overflow-x:auto;justify-content:flex-start}
+  .nav .btn{font-size:24px;min-width:112px;padding:10px 12px}
+  .counter{min-width:90px;flex:0 0 90px}
+}
+
+
+/* ===== Requested page-specific modifications ===== */
+.page1-audio-panel{width:min(510px,92vw);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center}
+.page1-audio-panel input[type="file"]{width:100%;max-width:440px;font-size:24px;color:var(--ink)}
+.page1-audio-controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.page1-audio-controls .btn{min-width:125px}
+.page2-pair-game{width:min(1160px,95vw);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(2,145px);gap:14px}
+.page2-pair-card{border:5px solid #cfe9df;border-radius:22px;background:#fff;cursor:pointer;position:relative;overflow:hidden;user-select:none;min-width:0;box-shadow:0 7px 16px rgba(35,66,74,.10)}
+.page2-pair-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:8px;backface-visibility:hidden;transition:transform .35s ease}
+.page2-pair-front{background:linear-gradient(135deg,#fffaf0,#dff7ef);color:var(--blue);font-size:54px;font-weight:bold;transform:rotateY(0deg)}
+.page2-pair-back{background:#fff;font-size:32px;font-weight:bold;transform:rotateY(180deg)}
+.page2-pair-card.revealed .page2-pair-front{transform:rotateY(180deg)}.page2-pair-card.revealed .page2-pair-back{transform:rotateY(0deg)}
+.page2-pair-card.matched{background:#d9f8df;border-color:#57b56b;pointer-events:none}.page2-pair-card .classroom-icon{transform:scale(.72);transform-origin:center}
+.page2-actions{display:flex;justify-content:center;gap:14px;margin-top:10px}
+.page4-compact .scene,.page9-compact .scene{transform:scale(.70);transform-origin:top center;margin-top:0;margin-bottom:-82px}
+.page4-compact .prompt,.page9-compact .prompt{margin:4px 0 8px}.page4-compact .choices,.page9-compact .choices{gap:12px}
+.page4-compact .choice,.page9-compact .choice{padding:12px 16px}.page4-compact .feedback,.page9-compact .feedback{margin-top:6px;margin-bottom:0}
+.page5-equal-match>div{display:grid;grid-template-rows:repeat(4,minmax(105px,1fr));gap:10px}
+.page5-equal-match .dropzone,.page5-equal-match .drag-card{width:100%;min-height:105px;margin:0;padding:14px;border-radius:22px;font-size:34px;line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;overflow-wrap:anywhere}
+.page10-center{flex:1;width:100%;min-height:0;display:flex;align-items:center;justify-content:center;padding-bottom:20px}.page10-center .panel{width:min(950px,92vw);text-align:center}
+@media(max-width:1000px){.page2-pair-game{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,130px)}}
+
+/* Inserted review pages and the expanded speaking page */
+.review-match{display:grid;grid-template-columns:repeat(6,minmax(125px,1fr));gap:14px;width:min(1160px,95vw)}
+.review-card{min-height:185px;background:#fff;border:5px solid #cfe9df;border-radius:22px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 7px 16px rgba(35,66,74,.10)}
+.review-card.selected{border-color:var(--yellow);background:#fff8dd}.review-card.matched{border-color:#57b56b;background:#d9f8df;pointer-events:none}.review-card .classroom-icon{transform:scale(.72)}
+.review-word{font-size:34px;color:var(--blue);font-weight:bold}.review-card.picture .review-word{visibility:hidden}.review-card.picture.revealed .review-word{visibility:visible}
+.order-bank,.order-slots,.dialogue-bank{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;width:min(1120px,94vw)}
+.order-card,.dialogue-card{font-size:35px;background:#fff1c9;border:5px solid #e7bd4d;border-radius:20px;padding:13px 18px;cursor:grab;user-select:none}
+.order-card.selected,.dialogue-card.selected{border-color:var(--pink);background:#ffe5d4}
+.order-slots{margin-top:20px}.order-slot{width:155px;min-height:88px;border:5px dashed #9ccbb9;border-radius:20px;background:#f9fffc;display:flex;align-items:center;justify-content:center}.order-slot:before{content:attr(data-number);font-size:28px;color:#9ccbb9}.order-slot:not(:empty):before{display:none}
+.dialogue-line{font-size:45px;text-align:center;margin:12px 0}.dialogue-blank{display:inline-flex;min-width:180px;min-height:67px;padding:4px 10px;border-bottom:6px solid var(--blue);align-items:center;justify-content:center;vertical-align:middle}.dialogue-blank .dialogue-card{font-size:34px;padding:7px 12px}
+.dialogue-bank{margin:12px auto 0;align-items:center}.dialogue-group-label{width:100%;font-size:28px;text-align:center;color:var(--green)}
+.dialogue-actions{display:flex;justify-content:center;margin-top:16px}
+.page12-speak .page10-center{flex:0 0 auto;align-items:flex-start;padding-bottom:8px}
+.page12-speak .page10-center .panel{width:min(1080px,94vw);padding:16px 20px}
+.page12-speak .prompt{margin:0 0 6px}.page12-speak .dialogue-line{margin:6px 0}.page12-speak .small{margin:5px 0}
+.page12-speak .dialogue-bank{gap:9px;margin-top:8px}
+.page12-speak .dialogue-card{font-size:30px;padding:9px 14px}
+.page12-speak .dialogue-card[data-kind="prep"]{background:#d9f8df;border-color:#57b56b;color:#285d37}
+.page12-speak .dialogue-card[data-kind="noun"]{background:#dff3ff;border-color:#74bde0;color:#214a56}
+.page12-speak .dialogue-actions{margin-top:10px}.page12-speak .feedback{min-height:38px;margin:5px auto 0;font-size:34px}
+.ppt-slide{padding:10px 18px 18px;background:#f8f8f8;justify-content:center!important;overflow:hidden}
+.ppt-canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;box-shadow:0 8px 24px rgba(35,66,74,.16)}
+.ppt-slide.active .ppt-canvas{animation:pptFade .55s ease both}
+@keyframes pptFade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.ppt-audio-bar{position:absolute;z-index:20;left:50%;bottom:18px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 16px;border:4px solid #cfe9df;border-radius:22px;background:rgba(255,255,255,.96);box-shadow:0 7px 18px rgba(35,66,74,.18)}
+#songSlide .ppt-canvas{max-height:calc(100% - 92px);margin-bottom:92px}
+.ppt6-html-frame{position:relative;display:block;flex:0 0 auto;width:min(calc(100vw - 36px),calc((100dvh - 224px)*16/9));height:auto;aspect-ratio:16/9;margin-bottom:92px;overflow:hidden;box-shadow:0 8px 24px rgba(35,66,74,.16)}
+.ppt6-html-frame .ppt-canvas{width:100%;height:100%;max-width:none;max-height:none;margin:0;object-fit:fill;box-shadow:none}
+#songSlide .ppt6-html-frame .ppt-canvas{max-height:none;margin-bottom:0}
+.ppt6-answer-cover{position:absolute;left:53%;top:90%;width:16%;height:8%;background:#fdf8eb;pointer-events:none}
+.ppt6-answer-trigger{position:absolute;left:54%;top:90.4%;z-index:3;border:0;background:transparent;color:#326b7a;font:700 clamp(18px,2.4vw,34px)/1 "Arial Rounded MT Bold","Trebuchet MS",Arial,sans-serif;text-decoration:underline;cursor:pointer;padding:6px 9px}
+.ppt6-answer-trigger:focus-visible{outline:4px solid var(--yellow);border-radius:10px}
+.ppt6-answer-card{position:absolute;left:64%;top:89.8%;z-index:4;min-width:18%;padding:7px 12px;border:4px solid #e7bd4d;border-radius:18px;background:#fff1c9;color:#d83b45;font-size:clamp(19px,2.4vw,35px);font-weight:bold;text-align:center;box-shadow:0 6px 14px rgba(35,66,74,.17);opacity:0;visibility:hidden;transition:opacity .25s ease;pointer-events:none}
+.ppt6-answer-card.shown{opacity:1;visibility:visible}
+.ppt-animation-frame{position:relative;display:block;width:min(100%,calc((100dvh - 125px)*16/9));aspect-ratio:16/9;max-height:100%;cursor:pointer}
+.ppt-animation-frame .ppt-canvas{width:100%;height:100%;max-width:none;max-height:none;margin:0;object-fit:contain}
+.prep-reveal-word{position:absolute;width:15.35%;height:10.9%;display:flex;align-items:center;justify-content:center;color:#f00;font-family:"Comic Sans MS","Arial Rounded MT Bold",sans-serif;font-size:clamp(20px,4.2vw,56px);font-weight:700;line-height:1;opacity:0;pointer-events:none}
+.prep-reveal-word.shown{opacity:1}
+.prep-reveal-word.wipe-down{clip-path:inset(0 0 100% 0)}.prep-reveal-word.wipe-down.shown{clip-path:inset(0 0 0 0);transition:clip-path .5s ease,opacity .08s linear}
+.prep-reveal-word.wheel{clip-path:circle(0 at 50% 50%);transform:rotate(-18deg) scale(.7)}.prep-reveal-word.wheel.shown{clip-path:circle(150% at 50% 50%);transform:rotate(0) scale(1);transition:clip-path 1s ease,transform 1s ease,opacity .08s linear}
+.prep-in{left:16.92%;top:26.9%}.prep-on{left:56.1%;top:26.87%}.prep-by{left:18.46%;top:53.85%}.prep-under{left:56.1%;top:53.64%}
+.prep-canvas-tools{position:relative;display:block;width:min(calc(100vw - 36px),calc((100dvh - 110px)*16/9));height:auto;aspect-ratio:16/9;overflow:hidden;box-shadow:0 8px 24px rgba(35,66,74,.16);touch-action:none}
+.prep-canvas-tools .ppt-canvas{width:100%;height:100%;max-width:none;max-height:none;object-fit:fill;box-shadow:none;pointer-events:none;user-select:none}
+.free-prep-card{position:absolute;width:12%;height:9%;display:flex;align-items:center;justify-content:center;border:4px solid #74bde0;border-radius:18px;background:rgba(223,243,255,.96);color:#214a56;font-size:clamp(18px,2.8vw,40px);font-weight:bold;box-shadow:0 5px 11px rgba(35,66,74,.17);cursor:grab;user-select:none;touch-action:none;z-index:5}
+.free-prep-card.dragging{cursor:grabbing;z-index:12;box-shadow:0 10px 24px rgba(35,66,74,.34);border-color:var(--yellow)}
+.prep-canvas-reset{position:absolute;right:1.5%;top:1.5%;z-index:10;font-size:clamp(16px,1.8vw,27px);min-width:0;padding:7px 14px}
+.ppt-audio-bar .btn{font-size:25px;min-width:105px;padding:9px 14px}.ppt-audio-time{font-size:24px;min-width:115px;text-align:center;color:var(--blue)}
+@media(max-width:820px){.ppt-slide{padding:6px}.ppt-audio-bar{bottom:8px;gap:6px;padding:7px 9px}.ppt-audio-bar .btn{font-size:20px;min-width:82px;padding:7px 9px}.ppt-audio-time{font-size:19px;min-width:92px}.free-prep-card{border-width:3px}.prep-canvas-reset{padding:5px 10px}}
+.well-done{flex:1;width:100%;display:flex;align-items:center;justify-content:center;font-size:86px;color:var(--blue);text-align:center}
+@media(max-width:1000px){.review-match{grid-template-columns:repeat(3,minmax(125px,1fr))}.review-card{min-height:150px}.order-slot{width:135px}}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <section class="slide ppt-slide active"><img class="ppt-canvas" src="assets/images/slide-1.png" alt="Where's My Hat? title slide"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-2.png" alt="bag and box vocabulary"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-3.png" alt="chair and computer vocabulary"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-4.png" alt="desk and table comparison"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-5.png" alt="word-picture review directions"></section>
+  <section class="slide">
+    <h2>Word-Picture Review</h2>
+    <p class="prompt">Click a word, then click its picture.</p>
+    <div id="reviewMatch" class="review-match"></div>
+    <div id="reviewFeedback" class="feedback"></div>
+    <button class="btn alt" onclick="resetReviewMatch()">Reset</button>
+  </section>
+
+  <section class="slide ppt-slide" id="songSlide">
+    <div class="ppt6-html-frame">
+      <img class="ppt-canvas" src="assets/images/slide-6.png" alt="listen to the song and order the words">
+      <div class="ppt6-answer-cover"></div>
+      <button class="ppt6-answer-trigger" id="ppt6AnswerTrigger" onclick="event.stopPropagation();togglePpt6Answer()">Answer</button>
+      <div class="ppt6-answer-card" id="ppt6AnswerCard">2-6-3-5-4-1</div>
+    </div>
+    <audio id="pptLessonAudio" src="assets/audio/lesson-song.mp3" preload="metadata"></audio>
+    <div class="ppt-audio-bar">
+      <button class="btn" onclick="playPptAudio()">Play</button>
+      <button class="btn alt" onclick="pausePptAudio()">Pause</button>
+      <button class="btn warn" onclick="stopPptAudio()">Stop</button>
+      <span class="ppt-audio-time" id="pptAudioTime">0:00 / 0:00</span>
+    </div>
+  </section>
+  <section class="slide">
+    <h2>Pair Game</h2>
+    <p class="prompt">Match each word with its picture.</p>
+    <div id="pairGame" class="page2-pair-game"></div>
+    <div id="pairFeedback" class="feedback"></div>
+    <div class="page2-actions"><button class="btn alt" onclick="resetPairGame()">Reset</button></div>
+  </section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-7.png" alt="Where is and Where's sentence pattern"></section>
+
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-8.png" alt="in and on sentence examples"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-9.png" alt="under and by sentence examples"></section>
+  <section class="slide ppt-slide" id="prepActivitySlide">
+    <div class="prep-canvas-tools" id="prepCanvasTools">
+      <img class="ppt-canvas" src="assets/images/slide-10.png" alt="Four original Where's Mimi picture prompts">
+      <div class="free-prep-card" data-prep="in" data-left="1" data-top="1" style="left:1%;top:1%">in</div>
+      <div class="free-prep-card" data-prep="on" data-left="14" data-top="1" style="left:14%;top:1%">on</div>
+      <div class="free-prep-card" data-prep="by" data-left="14" data-top="11" style="left:14%;top:11%">by</div>
+      <div class="free-prep-card" data-prep="under" data-left="1" data-top="11" style="left:1%;top:11%">under</div>
+      <button class="btn alt prep-canvas-reset" onclick="event.stopPropagation();resetPpt10Activity()">Reset</button>
+    </div>
+  </section>
+
+  <section class="slide">
+    <h2>Listen and Look</h2>
+    <div class="stage">
+      <div class="scene" id="modelScene"><div class="floor"></div><div class="bench"></div><div class="bag"></div><div class="hat" id="modelHat"></div></div>
+      <div class="panel" style="min-width:470px;text-align:center">
+        <p class="prompt">Where's my hat?</p>
+        <p id="modelAnswer" class="sentence">Click an answer.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button class="btn" onclick="setModel('in')">in</button><button class="btn" onclick="setModel('on')">on</button><button class="btn" onclick="setModel('under')">under</button><button class="btn" onclick="setModel('by')">by</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide page4-compact">
+    <h2>Choose the Answer</h2>
+    <div class="scene" style="height:300px"><div class="floor"></div><div class="bench"></div><div class="hat" style="left:210px;top:235px"></div></div>
+    <p class="prompt">Where's my hat?</p>
+    <div class="choices" data-answer="under">
+      <div class="choice" onclick="checkChoice(this,'in')">It's in the bag.</div>
+      <div class="choice" onclick="checkChoice(this,'on')">It's on the table.</div>
+      <div class="choice" onclick="checkChoice(this,'under')">It's under the table.</div>
+      <div class="choice" onclick="checkChoice(this,'by')">It's by the table.</div>
+    </div>
+    <div class="feedback" id="choiceFeedback"></div>
+  </section>
+
+  <section class="slide">
+    <h2>Build the Sentence</h2>
+    <p class="prompt">Drag the words into the correct order.</p>
+    <div class="sentence-zone" id="sentenceZone"></div>
+    <div class="words" id="wordBank">
+      <div class="word" draggable="true">table.</div><div class="word" draggable="true">It's</div><div class="word" draggable="true">the</div><div class="word" draggable="true">under</div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:14px"><button class="btn" onclick="checkSentence()">Check</button><button class="btn alt" onclick="resetSentence()">Reset</button></div>
+    <div class="feedback" id="sentenceFeedback"></div>
+  </section>
+
+  <section class="slide">
+    <h2>Don't Forget “the”</h2>
+    <p class="prompt">Which sentence is correct?</p>
+    <div class="the-quiz">
+      <div class="the-card" onclick="checkThe(this,false)">It's on table.</div>
+      <div class="the-card" onclick="checkThe(this,true)">It's on the table.</div>
+    </div>
+    <div class="feedback" id="theFeedback"></div>
+    <div class="panel" style="margin-top:18px;text-align:center"><p class="small">Use <b>the</b> before the object.</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>What Does “by” Mean?</h2>
+    <p class="prompt">Click the picture that means “by”.</p>
+    <div class="by-demo">
+      <div class="panel" onclick="checkBy(this,false)" style="cursor:pointer"><div class="boxobj"><div class="ball" style="position:absolute;left:28px;top:28px"></div></div><p class="small" style="text-align:center">A</p></div>
+      <div class="panel" onclick="checkBy(this,true)" style="cursor:pointer;display:flex;gap:12px;align-items:center"><div class="boxobj"></div><div class="ball"></div><p class="small">B</p></div>
+    </div>
+    <div class="feedback" id="byFeedback"></div>
+  </section>
+
+  <section class="slide page9-compact">
+    <h2>Quick Challenge</h2>
+    <p class="prompt">Read the picture and choose.</p>
+    <div class="scene" style="height:300px"><div class="floor"></div><div class="bag"></div><div class="hat" style="left:78px;top:225px;transform:scale(.75)"></div></div>
+    <div class="choices" data-answer="in">
+      <div class="choice" onclick="checkQuick(this,'on')">It's on the bag.</div>
+      <div class="choice" onclick="checkQuick(this,'in')">It's in the bag.</div>
+      <div class="choice" onclick="checkQuick(this,'under')">It's under the bag.</div>
+      <div class="choice" onclick="checkQuick(this,'by')">It's by the bag.</div>
+    </div>
+    <div class="feedback" id="quickFeedback"></div>
+  </section>
+
+  <section class="slide page12-speak">
+    <h2>Speak Together</h2>
+    <div class="page10-center">
+      <div class="panel">
+        <p class="prompt">Teacher: Where's my hat?</p>
+        <p class="dialogue-line">Students: It's <span id="prepBlank" class="dialogue-blank" data-kind="prep"></span> the <span id="nounBlank" class="dialogue-blank" data-kind="noun"></span>.</p>
+        <p class="small">Use: in / on / under / by + the + object</p>
+        <div class="dialogue-bank" id="dialogueBank">
+          <div class="dialogue-card" draggable="true" data-kind="prep">in</div><div class="dialogue-card" draggable="true" data-kind="prep">on</div><div class="dialogue-card" draggable="true" data-kind="prep">under</div><div class="dialogue-card" draggable="true" data-kind="prep">by</div>
+          <div class="dialogue-card" draggable="true" data-kind="noun">chair</div><div class="dialogue-card" draggable="true" data-kind="noun">table</div><div class="dialogue-card" draggable="true" data-kind="noun">desk</div><div class="dialogue-card" draggable="true" data-kind="noun">computer</div><div class="dialogue-card" draggable="true" data-kind="noun">bag</div><div class="dialogue-card" draggable="true" data-kind="noun">box</div>
+        </div>
+        <div class="dialogue-actions"><button class="btn alt" onclick="resetDialogue()">Reset</button></div>
+        <div id="dialogueFeedback" class="feedback"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-17.png" alt="homework question"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-11.png" alt="Gather welcome screen instructions"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-12.png" alt="Gather name and next instructions"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-13.png" alt="Gather character selection instructions"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-14.png" alt="Gather waiting screen"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-15.png" alt="Gather switch views instructions"></section>
+  <section class="slide ppt-slide"><img class="ppt-canvas" src="assets/images/slide-16.png" alt="Gather interaction instructions"></section>
+
+  <div class="nav">
+    <button class="btn alt" onclick="prevSlide()">Back</button>
+    <span class="counter" id="counter">1 / 26</span>
+    <button class="btn" onclick="nextSlide()">Next</button>
+    <button class="btn warn" onclick="toggleFullScreen()">Full Screen</button>
+  </div>
+</div>
+<script>
+let current=0; const slides=[...document.querySelectorAll('.slide')];
+function showSlide(i){if(slides[current].id==='songSlide'){stopPptAudio();resetPpt6Answer()}if(slides[current].id==='prepActivitySlide')resetPpt10Activity();slides[current].classList.remove('active');current=(i+slides.length)%slides.length;slides[current].classList.add('active');document.getElementById('counter').textContent=`${current+1} / ${slides.length}`}
+function nextSlide(){if(current<slides.length-1)showSlide(current+1)} function prevSlide(){if(current>0)showSlide(current-1)}
+function toggleFullScreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen()}
+function showPrep(w,a,e){document.getElementById('prepFeedback').textContent=`${w}: ${a}`}
+function setModel(pos){const h=document.getElementById('modelHat'), ans=document.getElementById('modelAnswer');const map={in:{l:75,t:225,s:'It\'s in the bag.'},on:{l:210,t:120,s:'It\'s on the table.'},under:{l:210,t:235,s:'It\'s under the table.'},by:{l:405,t:190,s:'It\'s by the table.'}};h.style.left=map[pos].l+'px';h.style.top=map[pos].t+'px';h.style.transform='scale(.75)';ans.textContent=map[pos].s}
+function checkChoice(el,val){document.querySelectorAll('.slide.active .choice').forEach(x=>x.classList.remove('correct','wrong'));if(val==='under'){el.classList.add('correct');document.getElementById('choiceFeedback').textContent='Correct! It\'s under the table.'}else{el.classList.add('wrong');document.getElementById('choiceFeedback').textContent='Try again.'}}
+let dragged=null;document.querySelectorAll('[draggable="true"]').forEach(x=>x.addEventListener('dragstart',()=>dragged=x));document.querySelectorAll('.dropzone').forEach(z=>{z.addEventListener('dragover',e=>e.preventDefault());z.addEventListener('drop',()=>{if(dragged&&dragged.dataset.match===z.dataset.match){z.innerHTML='';z.appendChild(dragged);document.getElementById('matchFeedback').textContent='Good match!'}else document.getElementById('matchFeedback').textContent='Try another picture.'})});
+const zone=document.getElementById('sentenceZone'),bank=document.getElementById('wordBank');[zone,bank].forEach(a=>{a.addEventListener('dragover',e=>e.preventDefault());a.addEventListener('drop',()=>{if(dragged&&dragged.classList.contains('word'))a.appendChild(dragged)})});
+function checkSentence(){const s=[...zone.children].map(x=>x.textContent).join(' ');document.getElementById('sentenceFeedback').textContent=s==="It's under the table."?'Correct! Great sentence.':'Check the word order.'}
+function resetSentence(){[...zone.children].forEach(x=>bank.appendChild(x));document.getElementById('sentenceFeedback').textContent=''}
+function checkThe(el,ok){document.querySelectorAll('.the-card').forEach(x=>x.style.background='#fff');el.style.background=ok?'#d9f8df':'#ffe1e1';document.getElementById('theFeedback').textContent=ok?'Correct! Use “the”.':'Try again. We need “the”.'}
+function checkBy(el,ok){document.getElementById('byFeedback').textContent=ok?'Correct! “By” means next to.':'Try again. Look for “next to”.'}
+function checkQuick(el,val){document.querySelectorAll('.slide.active .choice').forEach(x=>x.classList.remove('correct','wrong'));if(val==='in'){el.classList.add('correct');document.getElementById('quickFeedback').textContent='Correct! It\'s in the bag.'}else{el.classList.add('wrong');document.getElementById('quickFeedback').textContent='Try again.'}}
+const prompts=['It\'s in the bag.','It\'s on the bench.','It\'s under the bench.','It\'s by the bench.'];function newExit(){document.getElementById('exitPrompt').textContent=prompts[Math.floor(Math.random()*prompts.length)]}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nextSlide();if(e.key==='ArrowLeft')prevSlide()});
+
+// Embedded PowerPoint audio: custom controls and automatic reset on navigation.
+const pptLessonAudio=document.getElementById('pptLessonAudio'),pptAudioTime=document.getElementById('pptAudioTime');
+function formatAudioTime(value){if(!Number.isFinite(value))return'0:00';const m=Math.floor(value/60),s=Math.floor(value%60);return`${m}:${String(s).padStart(2,'0')}`}
+function updatePptAudioTime(){pptAudioTime.textContent=`${formatAudioTime(pptLessonAudio.currentTime)} / ${formatAudioTime(pptLessonAudio.duration)}`}
+function playPptAudio(){pptLessonAudio.play().catch(()=>{})}
+function pausePptAudio(){pptLessonAudio.pause()}
+function stopPptAudio(){pptLessonAudio.pause();pptLessonAudio.currentTime=0;updatePptAudioTime()}
+pptLessonAudio.addEventListener('loadedmetadata',updatePptAudioTime);pptLessonAudio.addEventListener('timeupdate',updatePptAudioTime);pptLessonAudio.addEventListener('ended',stopPptAudio);
+
+// PPT slide 6: the original answer position is the only clickable reveal target.
+const ppt6AnswerCard=document.getElementById('ppt6AnswerCard');
+function togglePpt6Answer(){ppt6AnswerCard.classList.toggle('shown')}
+function resetPpt6Answer(){ppt6AnswerCard.classList.remove('shown')}
+resetPpt6Answer();
+
+// PPT slide 10: free pointer dragging, positioned against the complete slide canvas.
+const prepCanvasTools=document.getElementById('prepCanvasTools'),freePrepCards=[...document.querySelectorAll('#prepCanvasTools .free-prep-card')];let activePrepDrag=null;
+freePrepCards.forEach(card=>card.addEventListener('pointerdown',event=>{event.preventDefault();event.stopPropagation();const canvasRect=prepCanvasTools.getBoundingClientRect(),cardRect=card.getBoundingClientRect();card.style.left=`${cardRect.left-canvasRect.left}px`;card.style.top=`${cardRect.top-canvasRect.top}px`;activePrepDrag={card,pointerId:event.pointerId,offsetX:event.clientX-cardRect.left,offsetY:event.clientY-cardRect.top};card.classList.add('dragging');card.setPointerCapture(event.pointerId)}));
+freePrepCards.forEach(card=>card.addEventListener('pointermove',event=>{if(!activePrepDrag||activePrepDrag.card!==card||activePrepDrag.pointerId!==event.pointerId)return;const canvasRect=prepCanvasTools.getBoundingClientRect(),maxLeft=canvasRect.width-card.offsetWidth,maxTop=canvasRect.height-card.offsetHeight;card.style.left=`${Math.max(0,Math.min(maxLeft,event.clientX-canvasRect.left-activePrepDrag.offsetX))}px`;card.style.top=`${Math.max(0,Math.min(maxTop,event.clientY-canvasRect.top-activePrepDrag.offsetY))}px`}));
+function finishPrepCardDrag(event){if(!activePrepDrag||activePrepDrag.pointerId!==event.pointerId)return;activePrepDrag.card.classList.remove('dragging');if(activePrepDrag.card.hasPointerCapture(event.pointerId))activePrepDrag.card.releasePointerCapture(event.pointerId);activePrepDrag=null}
+freePrepCards.forEach(card=>{card.addEventListener('pointerup',finishPrepCardDrag);card.addEventListener('pointercancel',finishPrepCardDrag)});
+function resetPpt10Activity(){activePrepDrag=null;freePrepCards.forEach(card=>{card.classList.remove('dragging');card.style.left=`${card.dataset.left}%`;card.style.top=`${card.dataset.top}%`})}
+resetPpt10Activity();
+
+// Page 1: local audio upload and custom playback controls.
+const audioUpload=document.getElementById('audioUpload');
+const lessonAudio=document.getElementById('lessonAudio');
+let uploadedAudioUrl='';
+if(audioUpload)audioUpload.addEventListener('change',function(){const file=this.files&&this.files[0];if(!file)return;lessonAudio.pause();lessonAudio.currentTime=0;if(uploadedAudioUrl)URL.revokeObjectURL(uploadedAudioUrl);uploadedAudioUrl=URL.createObjectURL(file);lessonAudio.src=uploadedAudioUrl;lessonAudio.load()});
+function playLessonAudio(){if(!lessonAudio.src)return;lessonAudio.play().catch(()=>{})}
+function pauseLessonAudio(){lessonAudio.pause()}
+function stopLessonAudio(){lessonAudio.pause();lessonAudio.currentTime=0}
+
+// Page 2: six word-picture memory pairs.
+const pairItems=[
+{key:'chair',word:'chair',picture:'<div class="classroom-icon icon-chair"><span class="back"></span><span class="seat"></span><span class="leg1"></span><span class="leg2"></span></div>'},
+{key:'bag',word:'bag',picture:'<div class="classroom-icon icon-bag"><span class="handle"></span><span class="body"></span><span class="pocket"></span></div>'},
+{key:'table',word:'table',picture:'<div class="classroom-icon icon-table"><span class="top"></span><span class="leg l1"></span><span class="leg l2"></span></div>'},
+{key:'computer',word:'computer',picture:'<div class="classroom-icon icon-computer"><span class="screen"></span><span class="stand"></span><span class="base"></span></div>'},
+{key:'box',word:'box',picture:'<div class="classroom-icon icon-box"><span class="body"></span><span class="rim"></span></div>'},
+{key:'desk',word:'desk',picture:'<div class="classroom-icon icon-desk"><span class="top"></span><span class="side s1"></span><span class="side s2"></span><span class="drawer"></span></div>'}
+];
+let pairFirstCard=null,pairBusy=false,pairMatches=0;
+function shufflePairCards(cards){const result=[...cards];for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]]}return result}
+function renderPairGame(){pairFirstCard=null;pairBusy=false;pairMatches=0;document.getElementById('pairFeedback').textContent='';const cards=[];pairItems.forEach(item=>{cards.push({key:item.key,type:'word',content:item.word});cards.push({key:item.key,type:'picture',content:item.picture})});document.getElementById('pairGame').innerHTML=shufflePairCards(cards).map(card=>`<div class="page2-pair-card" data-key="${card.key}" data-type="${card.type}" onclick="flipPairCard(this)"><div class="page2-pair-face page2-pair-front">?</div><div class="page2-pair-face page2-pair-back">${card.content}</div></div>`).join('')}
+function flipPairCard(card){if(pairBusy||card.classList.contains('matched')||card===pairFirstCard)return;card.classList.add('revealed');if(!pairFirstCard){pairFirstCard=card;return}pairBusy=true;const first=pairFirstCard;const ok=first.dataset.key===card.dataset.key&&first.dataset.type!==card.dataset.type;if(ok){first.classList.add('matched');card.classList.add('matched');pairMatches++;document.getElementById('pairFeedback').textContent=pairMatches===6?'Great job! You matched all six pairs.':'Good match!';pairFirstCard=null;pairBusy=false}else{document.getElementById('pairFeedback').textContent='Try again.';setTimeout(()=>{first.classList.remove('revealed');card.classList.remove('revealed');pairFirstCard=null;pairBusy=false},700)}}
+function resetPairGame(){renderPairGame()}
+renderPairGame();
+
+// Inserted page: visible word-picture click matching review.
+let reviewWord=null,reviewPicture=null,reviewMatches=0;
+function renderReviewMatch(){
+  reviewWord=null;reviewPicture=null;reviewMatches=0;
+  document.getElementById('reviewFeedback').textContent='';
+  const words=pairItems.map(item=>`<div class="review-card word-card" data-key="${item.key}" onclick="chooseReview(this,'word')"><div class="review-word">${item.word}</div></div>`).join('');
+  const pictures=shufflePairCards(pairItems).map(item=>`<div class="review-card picture" data-key="${item.key}" onclick="chooseReview(this,'picture')"><div class="icon-wrap">${item.picture}</div><div class="review-word">${item.word}</div></div>`).join('');
+  document.getElementById('reviewMatch').innerHTML=words+pictures;
+}
+function chooseReview(card,type){
+  if(card.classList.contains('matched'))return;
+  if(type==='word'){
+    document.querySelectorAll('#reviewMatch .word-card').forEach(x=>x.classList.remove('selected'));
+    reviewWord=card;card.classList.add('selected');
+  }else{
+    document.querySelectorAll('#reviewMatch .picture').forEach(x=>x.classList.remove('selected','revealed'));
+    reviewPicture=card;card.classList.add('selected','revealed');
+  }
+  if(!reviewWord||!reviewPicture)return;
+  if(reviewWord.dataset.key===reviewPicture.dataset.key){
+    reviewWord.classList.remove('selected');reviewPicture.classList.remove('selected');
+    reviewWord.classList.add('matched');reviewPicture.classList.add('matched','revealed');reviewMatches++;
+    document.getElementById('reviewFeedback').textContent=reviewMatches===6?'Well done! You matched all six words.':'Good match!';
+  }else{
+    document.getElementById('reviewFeedback').textContent='Try again.';
+    reviewWord.classList.remove('selected');reviewPicture.classList.remove('selected','revealed');
+  }
+  reviewWord=null;reviewPicture=null;
+}
+function resetReviewMatch(){renderReviewMatch()}
+renderReviewMatch();
+
+// Inserted page: drag or click vocabulary into the requested sequence.
+const orderBank=document.getElementById('orderBank'),orderSlots=[...document.querySelectorAll('.order-slot')];
+let selectedOrderCard=null;
+document.querySelectorAll('.order-card').forEach(card=>card.addEventListener('click',()=>{
+  document.querySelectorAll('.order-card').forEach(x=>x.classList.remove('selected'));
+  selectedOrderCard=card;card.classList.add('selected');
+}));
+orderSlots.forEach(slot=>{
+  slot.addEventListener('dragover',e=>e.preventDefault());
+  slot.addEventListener('drop',()=>{if(dragged&&dragged.classList.contains('order-card'))placeOrderCard(dragged,slot)});
+  slot.addEventListener('click',()=>{if(selectedOrderCard)placeOrderCard(selectedOrderCard,slot)});
+});
+orderBank?.addEventListener('dragover',e=>e.preventDefault());
+orderBank?.addEventListener('drop',()=>{if(dragged&&dragged.classList.contains('order-card'))orderBank.appendChild(dragged)});
+function placeOrderCard(card,slot){if(slot.firstElementChild)orderBank.appendChild(slot.firstElementChild);slot.appendChild(card);card.classList.remove('selected');selectedOrderCard=null;document.getElementById('orderFeedback').textContent=''}
+function checkOrder(){const answer=orderSlots.map(slot=>slot.firstElementChild?.dataset.word||'').join(',');document.getElementById('orderFeedback').textContent=answer==='bag,box,computer,desk,chair,table'?'Correct! bag, box, computer, desk, chair, table':'Check the order and try again.'}
+function resetOrder(){orderSlots.forEach(slot=>{if(slot.firstElementChild)orderBank.appendChild(slot.firstElementChild)});selectedOrderCard=null;document.querySelectorAll('.order-card').forEach(x=>x.classList.remove('selected'));document.getElementById('orderFeedback').textContent=''}
+
+// Expanded original page 10: draggable and clickable cards fill the two blanks.
+const dialogueBank=document.getElementById('dialogueBank'),dialogueBlanks=[document.getElementById('prepBlank'),document.getElementById('nounBlank')];
+let selectedDialogueCard=null;
+document.querySelectorAll('.dialogue-card').forEach(card=>card.addEventListener('click',()=>{
+  document.querySelectorAll('.dialogue-card').forEach(x=>x.classList.remove('selected'));
+  selectedDialogueCard=card;card.classList.add('selected');
+  const target=dialogueBlanks.find(blank=>blank.dataset.kind===card.dataset.kind);
+  placeDialogueCard(card,target);
+}));
+dialogueBlanks.forEach(blank=>{
+  blank.addEventListener('dragover',e=>e.preventDefault());
+  blank.addEventListener('drop',()=>{if(dragged&&dragged.classList.contains('dialogue-card')&&dragged.dataset.kind===blank.dataset.kind)placeDialogueCard(dragged,blank)});
+});
+dialogueBank.addEventListener('dragover',e=>e.preventDefault());
+dialogueBank.addEventListener('drop',()=>{if(dragged&&dragged.classList.contains('dialogue-card'))dialogueBank.appendChild(dragged)});
+function placeDialogueCard(card,blank){if(!blank||card.dataset.kind!==blank.dataset.kind)return;if(blank.firstElementChild)dialogueBank.appendChild(blank.firstElementChild);blank.appendChild(card);card.classList.remove('selected');selectedDialogueCard=null;document.getElementById('dialogueFeedback').textContent=dialogueBlanks.every(x=>x.firstElementChild)?`Great! It's ${dialogueBlanks[0].textContent.trim()} the ${dialogueBlanks[1].textContent.trim()}.`:''}
+function resetDialogue(){dialogueBlanks.forEach(blank=>{if(blank.firstElementChild)dialogueBank.appendChild(blank.firstElementChild)});selectedDialogueCard=null;document.querySelectorAll('.dialogue-card').forEach(x=>x.classList.remove('selected'));document.getElementById('dialogueFeedback').textContent=''}
+
+</script>
+</body>
+</html>
